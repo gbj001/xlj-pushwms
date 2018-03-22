@@ -1,0 +1,42 @@
+spring:
+  datasource:
+#    url: jdbc:mysql://localhost:3306/test
+#    username: root
+#    password: root
+#    driver-class-name: com.mysql.jdbc.Driver
+
+    driver-class-name: oracle.jdbc.OracleDriver
+    url: jdbc:oracle:thin:@218.241.158.246:8152:NCGC
+    username: NCXLJ201801
+    password: NCXLJ201801
+
+
+server:
+  port: 8081
+  context-path: /pushwms
+
+firstwms: http://www.biadu.com
+secondwms: http://www.sohu.com
+thirdwms: http://www.sina.com.cn
+
+push.order.fail: 0  #推送失败的状态
+push.order.success: 1  #推送成功的状态
+push.order.maxcount: 108 #推送的最大次数
+push.order.porder: 1 #采购订单
+push.order.order: 2 #销售订单
+
+
+#各个wms系统相关配置
+wms.wj.system: WJ
+wms.wj.url: http://localhost:8080/calculate/freight-fee
+wms.msp.system: MSP
+wms.msp.url: http://localhost:8080/calculate/freight-fee
+wms.hy.system: HY
+wms.hy.url: http://localhost:8080/calculate/freight-fee
+
+
+mybatis:
+  mapper-locations: classpath:/mapper/*.xml
+
+logging:
+  config: classpath:logback.xml
