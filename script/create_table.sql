@@ -88,5 +88,7 @@ VALUES('唯捷wms系统','WJ','WJ001','WH002','北京虚拟仓库','1');
 INSERT INTO CS_WAREHOUSE_CONFIG("wms_name","wms_short","wms_warehouse_code","nc_warehouse_code","nc_warehouse_name","flag")
 VALUES('唯捷wms系统','WJ','WJ003','WH003','上海仓库','1');
 INSERT INTO CS_WAREHOUSE_CONFIG("wms_name","wms_short","wms_warehouse_code","nc_warehouse_code","nc_warehouse_name","flag")
-VALUES('马上配wms系统','MSP','MSP001','WH004','广州仓库','1');
+VALUES('马上配wms系统','MSP','SPC','WH00500','山普仓','1');
+INSERT INTO CS_WAREHOUSE_CONFIG("wms_name","wms_short","wms_warehouse_code","nc_warehouse_code","nc_warehouse_name","flag")
+VALUES('马上配wms系统','MSP','JDC','WH004','嘉定仓','1');
 COMMIT;

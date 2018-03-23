@@ -91,7 +91,7 @@ public class OrderExchangeInfoService {
             }
             if (warehouseConfig.getWmsShort().equals(wmsMSPSystem)) {
                 //转换成wj需要的json格式数据
-                String json = convertToMSPJson(pushPoOrder);
+                String json = convertToMSPJson(pushPoOrder, warehouseConfig.getWmsWarehouseCode());
                 remoteClient(orderExchangeInfo, mspUrl, json);
                 orderExchangeInfo.setPushChannel(wmsMSPSystem);
             }
@@ -154,7 +154,7 @@ public class OrderExchangeInfoService {
     //调用封装的远程访问
     private void remoteClient(OrderExchangeInfo orderExchangeInfo, String url, String json) {
         try {
-            Response response = new HttpClientUtils().post(wjUrl, json);
+            Response response = new HttpClientUtils().post(url, json);
             orderExchangeInfo.setRequestContent(json);
             orderExchangeInfo.setResponseTime(new Date());
             if (response.isSuccessful()) {
@@ -176,12 +176,12 @@ public class OrderExchangeInfoService {
 
     }
 
-    private String convertToMSPJson(PushPoOrder pushPoOrder) {
+    private String convertToMSPJson(PushPoOrder pushPoOrder, String wmsWarehouseCode) {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("{\"order\": {\"warehouse_number\":\"").append(pushPoOrder.getWarehouseCode()).append("\",\"customer_number\": \"").append(pushPoOrder.getBillCode()).append("\",\"delivery_address\": \"\",\"sign_up\": \"\",\"sign_up_tel\": \"\",\"remarks\": \"\"},");
+        stringBuilder.append("{\"order\": {\"warehouse_number\":\"").append(wmsWarehouseCode).append("\",\"customer_number\": \"").append(pushPoOrder.getBillCode()).append("\",\"delivery_address\": \"\",\"sign_up\": \"\",\"sign_up_tel\": \"\",\"remarks\": \"\"},");
         stringBuilder.append("\"goods\": [");
         for (POrderDetail pOrderDetail : pushPoOrder.getItems()) {
-            stringBuilder.append("{\"goods_name\": \"").append(pOrderDetail.getMaterialName()).append("\",\"goods_number\": \"").append(pOrderDetail.getMaterialName()).append("\",\"gifts\": \"").append(pOrderDetail.getIsGift()).append("\",\"specification\": \"\",\"barcode\": \"\",\"color\": \"\",\"style\": \"\",\"weight\": \"\",\"volume\": \"\",\"large_unit_quantity\": \"\",\"small_unit_quantity\": \"").append(pOrderDetail.getQuantity()).append("\",\"cost\": \"\",\"temperature\": \"\",\"humidity\": \"\",\"csourcetype\": \"21\",\"cfirstbillhid\": \"").append(pOrderDetail.getPkOrderHeader()).append("\",\"cfirstbillbid\": \"").append(pOrderDetail.getPkOrderBody()).append("\",\"vsourcebillcode\": \"").append(pushPoOrder.getBillCode()).append("\",\"remark\": \"\"},");
+            stringBuilder.append("{\"goods_name\": \"").append(pOrderDetail.getMaterialName()).append("\",\"goods_number\": \"").append(pOrderDetail.getMaterialCode()).append("\",\"gifts\": \"").append(pOrderDetail.getIsGift()).append("\",\"specification\": \"\",\"barcode\": \"\",\"color\": \"\",\"style\": \"\",\"weight\": \"\",\"volume\": \"\",\"large_unit_quantity\": \"\",\"small_unit_quantity\": \"").append(pOrderDetail.getQuantity()).append("\",\"cost\": \"\",\"temperature\": \"\",\"humidity\": \"\",\"csourcetype\": \"21\",\"cfirstbillhid\": \"").append(pOrderDetail.getPkOrderHeader()).append("\",\"cfirstbillbid\": \"").append(pOrderDetail.getPkOrderBody()).append("\",\"vsourcebillcode\": \"").append(pushPoOrder.getBillCode()).append("\",\"remark\": \"\"},");
         }
         stringBuilder = stringBuilder.delete(stringBuilder.length() - 1, stringBuilder.length());
 

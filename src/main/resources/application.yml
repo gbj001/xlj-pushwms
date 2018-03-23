@@ -30,7 +30,7 @@ push.order.order: 2 #销售订单
 wms.wj.system: WJ
 wms.wj.url: http://localhost:8080/calculate/freight-fee
 wms.msp.system: MSP
-wms.msp.url: http://localhost:8080/calculate/freight-fee
+wms.msp.url: http://test1api.minimat.cn/cooperation/xinniangji/purchase/saveOrder/T56noP9U
 wms.hy.system: HY
 wms.hy.url: http://localhost:8080/calculate/freight-fee
 
