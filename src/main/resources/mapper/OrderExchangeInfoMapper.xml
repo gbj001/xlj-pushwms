@@ -5,6 +5,7 @@
         <result property="outOrderId" column="out_order_id"/>
         <result property="orderType" column="order_type"/>
         <result property="pushCount" column="push_count"/>
+        <result property="pushProcessCount" column="push_process_count"/>
         <result property="pushStatus" column="push_status"/>
         <result property="pushChannel" column="push_channel"/>
         <result property="createdUser" column="created_user"/>
@@ -21,13 +22,14 @@
     </select>
 
     <insert id="insertOrderExchangeInfo" parameterType="com.xinliangjishipin.pushwms.entity.OrderExchangeInfo">
-        INSERT INTO CS_ORDER_EXCHANGE_INFO("out_order_id", "order_type", "push_count", "push_status", "created_user", "created_time", "updated_user", "updated_time", "request_content","response_content","response_time")
-        VALUES (#{outOrderId}, #{orderType}, #{pushCount}, #{pushStatus}, #{createdUser}, #{createdTime}, #{updatedUser}, #{updatedTime}, #{requestContent}, #{responseContent}, #{responseTime})
+        INSERT INTO CS_ORDER_EXCHANGE_INFO("out_order_id", "order_type", "push_count", "push_process_count", "push_status", "created_user", "created_time", "updated_user", "updated_time", "request_content","response_content","response_time")
+        VALUES (#{outOrderId}, #{orderType}, #{pushCount}, #{pushProcessCount}, #{pushStatus}, #{createdUser}, #{createdTime}, #{updatedUser}, #{updatedTime}, #{requestContent}, #{responseContent}, #{responseTime})
     </insert>
 
     <update id="updateOrderExchangeInfo" parameterType="com.xinliangjishipin.pushwms.entity.OrderExchangeInfo">
         UPDATE CS_ORDER_EXCHANGE_INFO
         SET "push_count" = "push_count" + 1,
+        "push_process_count" = #{pushProcessCount},
         "push_status" = #{pushStatus},
         "push_channel" = #{pushChannel},
         <if test="updatedUser!=null">
@@ -47,13 +49,4 @@
         </if>
         WHERE "out_order_id" = #{outOrderId}
     </update>
-
-    <!--<update id="updatePushStatusSuccess" parameterType="com.xinliangjishipin.pushwms.entity.OrderExchangeInfo">-->
-        <!--UPDATE CS_ORDER_EXCHANGE_INFO-->
-        <!--SET "push_status" = '1',-->
-        <!--"push_channel" = #{pushChannel},-->
-        <!--"response_time" = #{responseTime},-->
-        <!--"response_content" = #{responseContent}-->
-        <!--WHERE "out_order_id" = #{outOrderId}-->
-    <!--</update>-->
 </mapper>

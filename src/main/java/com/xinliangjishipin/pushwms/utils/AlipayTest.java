@@ -102,8 +102,7 @@ public class AlipayTest {
     }
 
     public static void main(String args[]) {
-        AlipayTest alipayTest = new AlipayTest();
-        alipayTest.testAlipay();
+
     }
 
 

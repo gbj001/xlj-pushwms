@@ -2,6 +2,7 @@ package com.xinliangjishipin.pushwms;
 
 
 import com.xinliangjishipin.pushwms.service.OrderExchangeInfoService;
+import com.xinliangjishipin.pushwms.service.SendMailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +13,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class Schedule {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
-    @Value("${thirdwms}")
-    private String thirdwms;
 
     @Autowired
     private OrderExchangeInfoService orderExchangeInfoService;

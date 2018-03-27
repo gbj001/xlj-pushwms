@@ -3,6 +3,7 @@ CREATE TABLE "CS_ORDER_EXCHANGE_INFO" (
   "out_order_id" CHAR(20) NOT NULL,
   "order_type" CHAR(1) DEFAULT '' NOT NULL,
   "push_count" NUMBER(2) DEFAULT 0 NOT NULL,
+  "push_process_count" NUMBER(2) DEFAULT 0 NOT NULL,
   "push_status" CHAR(1) DEFAULT 0 NOT NULL,
   "push_channel" VARCHAR2(10),
   "created_user" VARCHAR2(20) DEFAULT '',
@@ -34,6 +35,7 @@ DISABLE ROW MOVEMENT
 COMMENT ON COLUMN CS_ORDER_EXCHANGE_INFO."out_order_id" is '请求单号';
 COMMENT ON COLUMN CS_ORDER_EXCHANGE_INFO."order_type" is '请求类型 1-采购入库单；2-销售出库单';
 COMMENT ON COLUMN CS_ORDER_EXCHANGE_INFO."push_count" is '推送次数';
+COMMENT ON COLUMN CS_ORDER_EXCHANGE_INFO."push_process_count" is '对方返回失败后再次推送次数';
 COMMENT ON COLUMN CS_ORDER_EXCHANGE_INFO."push_status" is '推送状态 0-推送失败，1-推送成功';
 COMMENT ON COLUMN CS_ORDER_EXCHANGE_INFO."push_channel" is '推送wms简称';
 COMMENT ON COLUMN CS_ORDER_EXCHANGE_INFO."created_user" is '推送人';
@@ -81,14 +83,16 @@ COMMENT ON COLUMN CS_WAREHOUSE_CONFIG."nc_warehouse_name" is 'nc系统仓库名�
 COMMENT ON COLUMN CS_WAREHOUSE_CONFIG."flag" is '是否启用';
 
 
+DELETE FROM CS_WAREHOUSE_CONFIG;
+
 INSERT INTO CS_WAREHOUSE_CONFIG("wms_name","wms_short","wms_warehouse_code","nc_warehouse_code","nc_warehouse_name","flag")
 VALUES('唯捷wms系统','WJ','WJ001','WH001','北京仓库','1');
 INSERT INTO CS_WAREHOUSE_CONFIG("wms_name","wms_short","wms_warehouse_code","nc_warehouse_code","nc_warehouse_name","flag")
 VALUES('唯捷wms系统','WJ','WJ001','WH002','北京虚拟仓库','1');
 INSERT INTO CS_WAREHOUSE_CONFIG("wms_name","wms_short","wms_warehouse_code","nc_warehouse_code","nc_warehouse_name","flag")
-VALUES('唯捷wms系统','WJ','WJ003','WH003','上海仓库','1');
+VALUES('唯捷wms系统','WJ','WJ003','WH00500','上海仓库','1');
 INSERT INTO CS_WAREHOUSE_CONFIG("wms_name","wms_short","wms_warehouse_code","nc_warehouse_code","nc_warehouse_name","flag")
-VALUES('马上配wms系统','MSP','SPC','WH00500','山普仓','1');
+VALUES('马上配wms系统','MSP','SPC','WH0005','山普仓','1');
 INSERT INTO CS_WAREHOUSE_CONFIG("wms_name","wms_short","wms_warehouse_code","nc_warehouse_code","nc_warehouse_name","flag")
 VALUES('马上配wms系统','MSP','JDC','WH004','嘉定仓','1');
 COMMIT;

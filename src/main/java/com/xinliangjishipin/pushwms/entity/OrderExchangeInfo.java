@@ -7,6 +7,7 @@ public class OrderExchangeInfo implements Serializable {
     private String outOrderId;
     private String orderType;
     private Integer pushCount;
+    private Integer pushProcessCount;
     private String pushStatus;
     private String pushChannel;
     private String createdUser;
@@ -26,6 +27,7 @@ public class OrderExchangeInfo implements Serializable {
         this.outOrderId = pOrder.getPkOrder();
         this.orderType = orderType;
         this.pushCount = 0;
+        this.pushProcessCount = 0;
         this.pushStatus = "0";
         this.createdUser = "system";
         this.createdTime = new Date();
@@ -43,6 +45,7 @@ public class OrderExchangeInfo implements Serializable {
                 "outOrderId='" + outOrderId + '\'' +
                 ", orderType='" + orderType + '\'' +
                 ", pushCount=" + pushCount +
+                ", pushProcessCount=" + pushProcessCount +
                 ", pushStatus='" + pushStatus + '\'' +
                 ", createdUser='" + createdUser + '\'' +
                 ", createdTime=" + createdTime +
@@ -74,6 +77,14 @@ public class OrderExchangeInfo implements Serializable {
 
     public void setPushCount(Integer pushCount) {
         this.pushCount = pushCount;
+    }
+
+    public Integer getPushProcessCount() {
+        return pushProcessCount;
+    }
+
+    public void setPushProcessCount(Integer pushProcessCount) {
+        this.pushProcessCount = pushProcessCount;
     }
 
     public String getPushStatus() {

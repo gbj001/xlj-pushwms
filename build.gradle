@@ -27,6 +27,7 @@ dependencies {
 	compile('mysql:mysql-connector-java:5.1.14')
 	compile ('com.squareup.okhttp3:okhttp:3.8.1')
 	compile('com.alibaba:fastjson:1.2.41')
+	compile('org.apache.commons:commons-email:1.4')
 	compile fileTree(dir: 'libs', include: ['*.jar'])
 	testCompile('org.springframework.boot:spring-boot-starter-test:2.0.0.RELEASE')
 }

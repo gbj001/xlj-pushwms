@@ -16,5 +16,6 @@
         AND NVL(po_order.dr, 0) = 0
         AND NVL(bd_supplier.dr,0) = 0
         AND taudittime > '2018-02-25'
+        AND po_order.vbillcode in('CD2018022600000754','CD2018031900000756')
     </select>
 </mapper>
