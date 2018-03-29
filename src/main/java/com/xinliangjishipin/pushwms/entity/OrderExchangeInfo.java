@@ -3,6 +3,9 @@ package com.xinliangjishipin.pushwms.entity;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * @author gengbeijun
+ */
 public class OrderExchangeInfo implements Serializable {
     private String outOrderId;
     private String orderType;
@@ -23,8 +26,8 @@ public class OrderExchangeInfo implements Serializable {
 
     }
 
-    public OrderExchangeInfo(POrder pOrder, String orderType){
-        this.outOrderId = pOrder.getPkOrder();
+    public OrderExchangeInfo(PurchaseOrder purchaseOrder, String orderType){
+        this.outOrderId = purchaseOrder.getPkOrder();
         this.orderType = orderType;
         this.pushCount = 0;
         this.pushProcessCount = 0;

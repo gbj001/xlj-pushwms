@@ -26,6 +26,9 @@ public class SendMailService {
 
     @Value("${to.email}")
     private String to;
+    
+    @Value("${separator}")
+    private String separator;
 
     /**
      * 发送文本邮件
@@ -43,7 +46,7 @@ public class SendMailService {
         // 设置邮件发送者
         mail.setFrom(userName);
         // 设置邮件接收者
-        for(String toEmail: to.split("\\|")){
+        for(String toEmail: to.split(separator)){
             mail.addTo(toEmail);
         }
         // 设置邮件编码
@@ -74,7 +77,7 @@ public class SendMailService {
         // 设置邮件发送者
         mail.setFrom(userName);
         // 设置邮件接收者
-        for(String toEmail: to.split("\\|")){
+        for(String toEmail: to.split(separator)){
             mail.addTo(toEmail);
         }
         // 设置邮件编码
@@ -105,7 +108,7 @@ public class SendMailService {
         // 设置邮件发送者
         mail.setFrom(userName);
         // 设置邮件接收者
-        for(String toEmail: to.split("\\|")){
+        for(String toEmail: to.split(separator)){
             mail.addTo(toEmail);
         }
         // 设置邮件编码
@@ -138,7 +141,7 @@ public class SendMailService {
         // 设置邮件发送者
         mail.setFrom(userName);
         // 设置邮件接收者
-        for(String toEmail: to.split("\\|")){
+        for(String toEmail: to.split(separator)){
             mail.addTo(toEmail);
         }
         // 设置邮件编码
@@ -176,7 +179,7 @@ public class SendMailService {
         // 设置邮件发送者
         mail.setFrom(userName);
         // 设置邮件接收者
-        for(String toEmail: to.split("\\|")){
+        for(String toEmail: to.split(separator)){
             mail.addTo(toEmail);
         }
         // 设置邮件编码

@@ -5,6 +5,9 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * @author gengbeijun
+ */
 public class SOrderDetail implements Serializable{
 
     private String PkOrder;

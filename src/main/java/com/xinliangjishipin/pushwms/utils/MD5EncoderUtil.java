@@ -1,27 +1,46 @@
 package com.xinliangjishipin.pushwms.utils;
 
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class MD5EncoderUtil {
 
-    public final static String MD5Encoder(String s, String charset) {
-        try {
-            byte[] btInput = s.getBytes(charset);
-            MessageDigest mdInst = MessageDigest.getInstance("MD5");
-            mdInst.update(btInput);
-            byte[] md = mdInst.digest();
-            StringBuffer sb = new StringBuffer();
-            for (int i = 0; i < md.length; i++) {
-                int val = ((int) md[i]) & 0xff;
-                if (val < 16) {
-                    sb.append("0");
+    /**
+     * 获取小写md5加密
+     *
+     * @param s
+     * @return
+     */
+    public final static String MD5Encoder(String s) {
+
+        String result = null;
+        char[] hexDigits = {//用来将字节转换成 16 进制表示的字符
+                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+        if (s != null) {
+            try {
+                MessageDigest md = MessageDigest.getInstance("MD5");
+                byte[] source = s.getBytes("utf-8");
+                md.update(source);
+                byte[] tmp = md.digest();
+                char[] str = new char[32];
+                for (int i = 0, j = 0; i < 16; i++) {
+                    byte b = tmp[i];
+                    str[j++] = hexDigits[b >>> 4 & 0xf];
+                    str[j++] = hexDigits[b & 0xf];
                 }
-                sb.append(Integer.toHexString(val));
+                result = new String(str);
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
             }
-            return sb.toString().toUpperCase();
-        } catch (Exception e) {
-            return null;
         }
+        return result;
+    }
+
+    public static void main(String[] args) {
+        System.out.println("");
     }
 
 }

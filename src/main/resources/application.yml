@@ -21,19 +21,22 @@ thirdwms: http://www.sina.com.cn
 
 push.order.fail: 0  #推送失败的状态
 push.order.success: 1  #推送成功的状态
-push.order.maxcount: 10 #推送的最大次数
-push.order.process.result.fail.maxcount: 3 #推送返回处理结果不成功时的最大次数
+push.order.maxcount: 100 #推送的最大次数
+push.order.process.result.fail.maxcount: 30 #推送返回处理结果不成功时的最大次数
 push.order.porder: 1 #采购订单
 push.order.order: 2 #销售订单
 
 
 #各个wms系统相关配置
 wms.wj.system: WJ
-wms.wj.url: http://localhost:8080/calculate/freight-fee
-wms.wj.appId: abcsd
-wms.wj.secretKey: abcsd
+wms.wj.url: http://weijie56-union.com:801/woptest/oapi/gateway
+wms.wj.appId: xinliangji001
+wms.wj.secretKey: 13aebd22704da335b2419aeba8280533
+wms.wj.companyCode: 10001
+
 wms.msp.system: MSP
 wms.msp.url: http://test1api.minimat.cn/cooperation/xinniangji/purchase/saveOrder/T56noP9U
+
 wms.hy.system: HY
 wms.hy.url: http://localhost:8080/calculate/freight-fee
 
@@ -45,6 +48,9 @@ send.password: 2008iloveyou
 to.email: gengbeijun2008@126.com|gengbeijun@xinliangjishipin.com
 
 
+
+#other
+separator: \\|
 
 mybatis:
   mapper-locations: classpath:/mapper/*.xml

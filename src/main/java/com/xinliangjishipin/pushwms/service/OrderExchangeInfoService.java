@@ -4,8 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.xinliangjishipin.pushwms.entity.*;
 import com.xinliangjishipin.pushwms.mapper.OrderExchangeInfoMapper;
-import com.xinliangjishipin.pushwms.mapper.POrderDetailMapper;
-import com.xinliangjishipin.pushwms.mapper.POrderMapper;
+import com.xinliangjishipin.pushwms.mapper.PurchaseOrderDetailMapper;
+import com.xinliangjishipin.pushwms.mapper.PurchaseOrderMapper;
 import com.xinliangjishipin.pushwms.mapper.WarehouseConfigMapper;
 import com.xinliangjishipin.pushwms.utils.HttpClientUtils;
 import com.xinliangjishipin.pushwms.utils.MD5EncoderUtil;
@@ -20,6 +20,9 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+/**
+ * @author gengbeijun
+ */
 @Service
 public class OrderExchangeInfoService {
 
@@ -29,10 +32,10 @@ public class OrderExchangeInfoService {
     private OrderExchangeInfoMapper orderExchangeInfoMapper;
 
     @Autowired
-    private POrderMapper pOrderMapper;
+    private PurchaseOrderMapper purchaseOrderMapper;
 
     @Autowired
-    private POrderDetailMapper pOrderDetailMapper;
+    private PurchaseOrderDetailMapper purchaseOrderDetailMapper;
 
     @Autowired
     private WarehouseConfigMapper warehouseConfigMapper;
@@ -70,6 +73,9 @@ public class OrderExchangeInfoService {
     @Value("${wms.wj.secretKey}")
     private String secretKey;
 
+    @Value("${wms.wj.companyCode}")
+    private String wjCompanyCode;
+
     @Value("${wms.msp.url}")
     private String mspUrl;
 
@@ -77,16 +83,20 @@ public class OrderExchangeInfoService {
     private String host;
 
     SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    //采购订单推送
+
+    /**
+     * 采购订单推送处理方法
+     */
     public void process() {
         logger.info("start.........");
-        //一.查询需要推送的NC采购单信息及明细列表
         List<PushPoOrder> resultPOrder = outputPushPoOrder();
-        //二. 把订单列表推送到各个wms系统
         pushOrder(resultPOrder);
         logger.info("end.....");
     }
 
+    /**
+     * 采购订单推送
+     */
     private void pushOrder(List<PushPoOrder> resultPOrder) {
         for (PushPoOrder pushPoOrder : resultPOrder) {
             //查询第三方wms配置表
@@ -104,7 +114,7 @@ public class OrderExchangeInfoService {
 
             if (warehouseConfig.getWmsShort().equals(wmsWJSystem)) {
                 //转换成wj需要的json格式数据
-                String json = convertToWJJson(pushPoOrder);
+                String json = convertToWJJson(pushPoOrder, warehouseConfig.getWmsWarehouseCode() );
                 remoteClient(orderExchangeInfo, wjUrl, json, wmsWJSystem);
                 orderExchangeInfo.setPushChannel(wmsWJSystem);
             }
@@ -116,7 +126,6 @@ public class OrderExchangeInfoService {
             }
             if (warehouseConfig.getWmsShort().equals(wmsHYSystem)) {
                 //转换成wj需要的json格式数据
-                System.out.println("调用 " + warehouseConfig.getWmsName());
                 orderExchangeInfo.setPushChannel(wmsHYSystem);
             }
             orderExchangeInfo.setUpdatedUser("");
@@ -125,19 +134,23 @@ public class OrderExchangeInfoService {
         }
     }
 
+    /**
+     * 从NC获取需要推送的采购订单
+     */
     private List<PushPoOrder> outputPushPoOrder() {
         List<PushPoOrder> resultPOrder = new ArrayList<PushPoOrder>();
 
         //一. 查询已审核的采购单主表
-        List<POrder> pOrderList = pOrderMapper.getPOrders();
-        for (POrder pOrder : pOrderList) {
-            OrderExchangeInfo orderExchangeInfo = orderExchangeInfoMapper.getByOutOrderId(pOrder.getPkOrder());
+        List<PurchaseOrder> purchaseOrderList = purchaseOrderMapper.getPurchaseOrders();
+        for (PurchaseOrder purchaseOrder : purchaseOrderList) {
+            OrderExchangeInfo orderExchangeInfo = orderExchangeInfoMapper.getByOutOrderId(purchaseOrder.getPkOrder());
             //1、过滤掉已经推送成功的采购订单
-            if (orderExchangeInfo == null || (orderExchangeInfo != null && orderExchangeInfo.getPushStatus().equals(pushOrderFail) && orderExchangeInfo.getPushCount() < pushOrderMaxCount)) {
-                PushPoOrder pushPoOrder = new PushPoOrder(pOrder);
+            boolean flag = orderExchangeInfo == null || (orderExchangeInfo != null && orderExchangeInfo.getPushStatus().equals(pushOrderFail) && orderExchangeInfo.getPushCount() < pushOrderMaxCount);
+            if (flag) {
+                PushPoOrder pushPoOrder = new PushPoOrder(purchaseOrder);
 
                 if (orderExchangeInfo == null) {
-                    OrderExchangeInfo newOrderExchangeInfo = new OrderExchangeInfo(pOrder, pushOrderPOrder);
+                    OrderExchangeInfo newOrderExchangeInfo = new OrderExchangeInfo(purchaseOrder, pushOrderPOrder);
                     orderExchangeInfoMapper.insertOrderExchangeInfo(newOrderExchangeInfo);
                 } else {
                     orderExchangeInfo.setUpdatedUser("");
@@ -147,21 +160,21 @@ public class OrderExchangeInfoService {
                     orderExchangeInfoMapper.updateOrderExchangeInfo(orderExchangeInfo);
                 }
                 //根据采购订单主ID获取采购订单明细
-                List<POrderDetail> allPOrderDetailList = pOrderDetailMapper.getPOrdersDetail(pOrder.getPkOrder());
+                List<PurchaseOrderDetail> allPurchaseOrderDetailList = purchaseOrderDetailMapper.getPurchaseOrderDetail(purchaseOrder.getPkOrder());
 
                 //过滤掉订单明细中包含多个仓库的采购单
-                if (!isSync(allPOrderDetailList, pOrder.getPkOrder())) {
+                if (!isSync(allPurchaseOrderDetailList, purchaseOrder.getPkOrder())) {
                     continue;
                 }
 
-                List<POrderDetail> pushPoOrderDetailList = new ArrayList<>();
-                for (POrderDetail pOrderDetail : allPOrderDetailList) {
-                    pOrderDetail.setBillCode(pOrder.getBillCode());
-                    pOrderDetail.setPkOrderHeader(pOrder.getPkOrder());
-                    pushPoOrderDetailList.add(pOrderDetail);
+                List<PurchaseOrderDetail> pushPoOrderDetailList = new ArrayList<>();
+                for (PurchaseOrderDetail purchaseOrderDetail : allPurchaseOrderDetailList) {
+                    purchaseOrderDetail.setBillCode(purchaseOrder.getBillCode());
+                    purchaseOrderDetail.setPkOrderHeader(purchaseOrder.getPkOrder());
+                    pushPoOrderDetailList.add(purchaseOrderDetail);
                 }
 
-                pushPoOrder.setWarehouseCode(allPOrderDetailList.get(0).getWarehouseCode());
+                pushPoOrder.setWarehouseCode(allPurchaseOrderDetailList.get(0).getWarehouseCode());
                 pushPoOrder.setItems(pushPoOrderDetailList);
                 resultPOrder.add(pushPoOrder);
             }
@@ -170,7 +183,10 @@ public class OrderExchangeInfoService {
         return resultPOrder;
     }
 
-    //调用封装的远程访问
+
+    /**
+     * 调用封装的远程访问
+     * */
     private void remoteClient(OrderExchangeInfo orderExchangeInfo, String url, String json, String wmsSystem) {
         try {
             logger.info("start remoteClient...........");
@@ -181,10 +197,10 @@ public class OrderExchangeInfoService {
             logger.info("response data:" + jsonObject.toString());
             boolean isSuccess = false;
             if (wmsSystem.equals(wmsMSPSystem)) {
-                isSuccess = jsonObject.get("status").toString().equals("success");
+                isSuccess = Objects.equals(jsonObject.get("status").toString(), "success");
             }
             if (wmsSystem.equals(wmsWJSystem)) {
-
+                isSuccess =  Objects.equals(jsonObject.getJSONObject("result").getJSONObject("body").get("code"),100);
             }
             if (wmsSystem.equals(wmsHYSystem)) {
 
@@ -192,8 +208,8 @@ public class OrderExchangeInfoService {
 
             if (response.isSuccessful()) {
                 orderExchangeInfo.setResponseContent(jsonObject.toString());
-                //推送成功或者（对方返回的结果是处理失败并且推送处理次数小于设定的次数）
-                if (isSuccess || (orderExchangeInfo.getPushProcessCount() > Integer.parseInt(processResultFailMaxCount) && !isSuccess)) {
+                boolean flag = isSuccess || (orderExchangeInfo.getPushProcessCount() > Integer.parseInt(processResultFailMaxCount) && !isSuccess);
+                if (flag) {
                     orderExchangeInfo.setPushStatus(pushOrderSuccess);
                 } else {
                     orderExchangeInfo.setPushProcessCount(orderExchangeInfo.getPushProcessCount() + 1);
@@ -208,38 +224,47 @@ public class OrderExchangeInfoService {
         }
     }
 
-
-    private String convertToWJJson(PushPoOrder pushPoOrder) {
+    /**
+     * 转换成唯捷需要的json格式
+     * */
+    private String convertToWJJson(PushPoOrder pushPoOrder, String wmswarehouseCode) {
         StringBuilder stringBuilder = new StringBuilder();
         StringBuilder bizContent = new StringBuilder();
         stringBuilder.append("{\"action\": \"weijie.wms.purchase.add\",\"appId\":\"").append(appId).append("\",");
 
-        bizContent.append("\"bizContent\": {\"purchaseOrderDate\":\"").append(new Date()).append("\",\"goodsSupplierCode\": \"").append(pushPoOrder.getPkSupplierCode()).append("\",\"goodsSupplierName\": \"").append(pushPoOrder.getPkSupplierName()).append("\",\"upstreamNumber\": \"").append(pushPoOrder.getBillCode()).append("\", \"transportNumber\": \"\", \"contractNumber\": \"\", \"areaCode\": \"\", \"provinceCode\": \"\", \"cityCode\": \"\", \"countyCode\": \"\", \"province\": \"\", \"city\": \"\", \"county\": \"\", \"wjCompanyCode\": \"\", \"wjWarehouseCode\": \"\", \"remark\": \"\",");
-        bizContent.append("\"goods\": [");
-        for (POrderDetail pOrderDetail : pushPoOrder.getItems()) {
-            bizContent.append("{\"goodsNo\": \"").append(pOrderDetail.getMaterialCode()).append("\",\"batchNo\": \"\",\"goodsCount\": \"").append(pOrderDetail.getQuantity()).append("\",\"goodsUnit\": \"\",\"goodsPrice\": \"\",\"goodsTotalPrice\": \"\",\"goodsWeight\": \"\",\"goodsSize\": \"\",\"goodsPromoteType\": \"\",\"extendInfo\":{\"cfirstbillhid\":\"").append(pOrderDetail.getPkOrderHeader()).append("\",\"cfirstbillbid\": \"").append(pOrderDetail.getPkOrderBody()).append("\", \"vsourcebillcode\": \"").append(pushPoOrder.getBillCode()).append("\"}, \"remark\": \"\"},");
+        //bizContent.append("{\\\"purchaseOrderDate\\\":\\\"").append(fmt.format(pushPoOrder.getdMakeDate())).append("\\\",\\\"goodsSupplierCode\\\": \\\"").append(pushPoOrder.getPkSupplierCode()).append("\\\",\\\"goodsSupplierName\\\": \\\"").append(pushPoOrder.getPkSupplierName()).append("\\\",\\\"upstreamNumber\\\": \\\"").append("CD2018031900000157").append("\\\", \\\"transportNumber\\\": \\\"\\\", \\\"contractNumber\\\": \\\"\\\", \\\"areaCode\\\": \\\"310000\\\", \\\"provinceCode\\\": \\\"\\\", \\\"cityCode\\\": \\\"\\\", \\\"countyCode\\\": \\\"\\\", \\\"province\\\": \\\"\\\", \\\"city\\\": \\\"\\\", \\\"county\\\": \\\"\\\", \\\"wjWarehouseCode\\\":\\\"").append(wmswarehouseCode).append("\\\", \\\"wjCompanyCode\\\": \\\"").append(wjCompanyCode).append("\\\", \\\"remark\\\": \\\"\\\",");
+        bizContent.append("{\\\"purchaseOrderDate\\\":\\\"").append(fmt.format(pushPoOrder.getdMakeDate())).append("\\\",\\\"goodsSupplierCode\\\": \\\"").append(pushPoOrder.getPkSupplierCode()).append("\\\",\\\"goodsSupplierName\\\": \\\"").append(pushPoOrder.getPkSupplierName()).append("\\\",\\\"upstreamNumber\\\": \\\"").append(pushPoOrder.getBillCode()).append("\\\", \\\"transportNumber\\\": \\\"\\\", \\\"contractNumber\\\": \\\"\\\", \\\"areaCode\\\": \\\"310000\\\", \\\"provinceCode\\\": \\\"\\\", \\\"cityCode\\\": \\\"\\\", \\\"countyCode\\\": \\\"\\\", \\\"province\\\": \\\"\\\", \\\"city\\\": \\\"\\\", \\\"county\\\": \\\"\\\", \\\"wjWarehouseCode\\\":\\\"").append(wmswarehouseCode).append("\\\", \\\"wjCompanyCode\\\": \\\"").append(wjCompanyCode).append("\\\", \\\"remark\\\": \\\"\\\",");
+        bizContent.append("\\\"goods\\\": [");
+        for (PurchaseOrderDetail purchaseOrderDetail : pushPoOrder.getItems()) {
+            bizContent.append("{\\\"goodsNo\\\": \\\"").append(purchaseOrderDetail.getMaterialCode()).append("\\\",\\\"batchNo\\\": \\\"\\\",\\\"goodsCount\\\": \\\"").append(purchaseOrderDetail.getQuantity()).append("\\\",\\\"goodsUnit\\\": \\\"").append(purchaseOrderDetail.getMeasureUnits()).append("\\\",\\\"goodsPrice\\\": \\\"0\\\",\\\"goodsTotalPrice\\\": \\\"\\\",\\\"goodsWeight\\\": \\\"\\\",\\\"goodsSize\\\": \\\"\\\",\\\"goodsPromoteType\\\": \\\"\\\",\\\"extendInfo\\\":{\\\"cfirstbillhid\\\":\\\"").append(purchaseOrderDetail.getPkOrderHeader()).append("\\\",\\\"cfirstbillbid\\\": \\\"").append(purchaseOrderDetail.getPkOrderBody()).append("\\\", \\\"vsourcebillcode\\\": \\\"").append(pushPoOrder.getBillCode()).append("\\\"}, \\\"remark\\\": \\\"\\\"},");
+            //bizContent.append("{\\\"goodsNo\\\": \\\"").append(purchaseOrderDetail.getMaterialCode()).append("\\\",\\\"batchNo\\\": \\\"\\\",\\\"goodsCount\\\": \\\"").append(purchaseOrderDetail.getQuantity()).append("\\\",\\\"goodsUnit\\\": \\\"").append(purchaseOrderDetail.getMeasureUnits()).append("\\\",\\\"goodsPrice\\\": \\\"0\\\",\\\"goodsTotalPrice\\\": \\\"\\\",\\\"goodsWeight\\\": \\\"\\\",\\\"goodsSize\\\": \\\"\\\",\\\"goodsPromoteType\\\": \\\"\\\",\\\"extendInfo\\\":{\\\"cfirstbillhid\\\":\\\"").append(purchaseOrderDetail.getPkOrderHeader()).append("\\\",\\\"cfirstbillbid\\\": \\\"").append(purchaseOrderDetail.getPkOrderBody()).append("\\\", \\\"vsourcebillcode\\\": \\\"").append("CD2018031900000157").append("\\\"}, \\\"remark\\\": \\\"\\\"},");
         }
         bizContent = bizContent.delete(bizContent.length() - 1, bizContent.length());
-
         bizContent.append("]");
-        bizContent.append("}");
+        bizContent.append("}\"");
 
-        String sign = MD5EncoderUtil.MD5Encoder(bizContent.toString() + secretKey, "utf-8");
+        StringBuilder signStr = new StringBuilder();
+        signStr.append(bizContent.delete(bizContent.length() - 1, bizContent.length()).toString().replaceAll("\\\\",""));
+        String sign = MD5EncoderUtil.MD5Encoder(signStr.toString() + secretKey);
+
         stringBuilder.append("\"sign\": \"").append(sign).append("\",");
         stringBuilder.append("\"charset\": \"utf-8\",\"version\": \"1.0\",\"timestamp\":\"").append(fmt.format(new Date())).append("\",");
 
-        stringBuilder.append(bizContent);
-        stringBuilder.append("}");
+        stringBuilder.append(bizContent.insert(0,"\"bizContent\":\""));
+        stringBuilder.append("\"}");
         return stringBuilder.toString();
 
     }
 
+    /**
+     * 转换成码上配需要的json格式
+     * */
     private String convertToMSPJson(PushPoOrder pushPoOrder, String wmsWarehouseCode) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("{\"order\": {\"warehouse_number\":\"").append(wmsWarehouseCode).append("\",\"customer_number\": \"").append(pushPoOrder.getBillCode()).append("\",\"delivery_address\": \"\",\"sign_up\": \"\",\"sign_up_tel\": \"\",\"remarks\": \"\"},");
         stringBuilder.append("\"goods\": [");
-        for (POrderDetail pOrderDetail : pushPoOrder.getItems()) {
-            stringBuilder.append("{\"goods_name\": \"").append(pOrderDetail.getMaterialName()).append("\",\"goods_number\": \"").append(pOrderDetail.getMaterialCode()).append("\",\"gifts\": \"").append(pOrderDetail.getIsGift()).append("\",\"specification\": \"\",\"barcode\": \"\",\"color\": \"\",\"style\": \"\",\"weight\": \"\",\"volume\": \"\",\"large_unit_quantity\": \"\",\"small_unit_quantity\": \"").append(pOrderDetail.getQuantity()).append("\",\"cost\": \"\",\"temperature\": \"\",\"humidity\": \"\",\"csourcetype\": \"21\",\"cfirstbillhid\": \"").append(pOrderDetail.getPkOrderHeader()).append("\",\"cfirstbillbid\": \"").append(pOrderDetail.getPkOrderBody()).append("\",\"vsourcebillcode\": \"").append(pushPoOrder.getBillCode()).append("\",\"remark\": \"\"},");
+        for (PurchaseOrderDetail purchaseOrderDetail : pushPoOrder.getItems()) {
+            stringBuilder.append("{\"goods_name\": \"").append(purchaseOrderDetail.getMaterialName()).append("\",\"goods_number\": \"").append(purchaseOrderDetail.getMaterialCode()).append("\",\"gifts\": \"").append(purchaseOrderDetail.getIsGift()).append("\",\"specification\": \"\",\"barcode\": \"\",\"color\": \"\",\"style\": \"\",\"weight\": \"\",\"volume\": \"\",\"large_unit_quantity\": \"\",\"small_unit_quantity\": \"").append(purchaseOrderDetail.getQuantity()).append("\",\"cost\": \"\",\"temperature\": \"\",\"humidity\": \"\",\"csourcetype\": \"21\",\"cfirstbillhid\": \"").append(purchaseOrderDetail.getPkOrderHeader()).append("\",\"cfirstbillbid\": \"").append(purchaseOrderDetail.getPkOrderBody()).append("\",\"vsourcebillcode\": \"").append(pushPoOrder.getBillCode()).append("\",\"remark\": \"\"},");
         }
         stringBuilder = stringBuilder.delete(stringBuilder.length() - 1, stringBuilder.length());
 
@@ -251,12 +276,14 @@ public class OrderExchangeInfoService {
 
     }
 
-    //过滤仓库编码不一致的采购订单
-    private boolean isSync(List<POrderDetail> pOrderDetailList, String pkOrderId) {
+    /**
+     * 过滤仓库编码不一致的采购订单
+     * */
+    private boolean isSync(List<PurchaseOrderDetail> purchaseOrderDetailList, String pkOrderId) {
         boolean flag = false;
         Set<String> warehouseCodeSet = new HashSet<>();
-        for (POrderDetail pOrderDetail : pOrderDetailList) {
-            warehouseCodeSet.add(pOrderDetail.getWarehouseCode());
+        for (PurchaseOrderDetail purchaseOrderDetail : purchaseOrderDetailList) {
+            warehouseCodeSet.add(purchaseOrderDetail.getWarehouseCode());
         }
         if (warehouseCodeSet.size() == 1) {
             flag = true;

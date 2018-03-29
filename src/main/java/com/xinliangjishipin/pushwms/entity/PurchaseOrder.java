@@ -1,26 +1,35 @@
 package com.xinliangjishipin.pushwms.entity;
 
-import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
-public class POrder implements Serializable{
+import java.util.Date;
+
+/**
+ * @author gengbeijun
+ */
+public class PurchaseOrder {
     private String pkOrder;
     private String billCode;
     private String warehouseCode;
     private String ownerId;
     private String pkSupplierName;
     private String pkSupplierCode;
+    @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date dMakeDate;
 
-
-    public POrder() {
+    public PurchaseOrder() {
     }
 
-    public POrder(String pkOrder, String billCode, String pkSupplierName, String pkSupplierCode, String ownerId) {
+    public PurchaseOrder(String pkOrder, String billCode, String pkSupplierName, String pkSupplierCode, String ownerId, Date dMakeDate) {
         this.pkOrder = pkOrder;
         this.billCode = billCode;
         this.pkSupplierName = pkSupplierName;
         this.pkSupplierCode = pkSupplierCode;
         this.ownerId = ownerId;
+        this.dMakeDate = dMakeDate;
     }
+
+
 
     public String getPkOrder() {
         return pkOrder;
@@ -69,4 +78,13 @@ public class POrder implements Serializable{
     public void setPkSupplierCode(String pkSupplierCode) {
         this.pkSupplierCode = pkSupplierCode;
     }
+
+    public Date getdMakeDate() {
+        return dMakeDate;
+    }
+
+    public void setdMakeDate(Date dMakeDate) {
+        this.dMakeDate = dMakeDate;
+    }
+
 }

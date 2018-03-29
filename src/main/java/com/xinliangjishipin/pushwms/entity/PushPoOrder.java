@@ -1,5 +1,8 @@
 package com.xinliangjishipin.pushwms.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import java.util.Date;
 import java.util.List;
 
 public class PushPoOrder {
@@ -9,18 +12,21 @@ public class PushPoOrder {
     private String ownerId;
     private String pkSupplierName;
     private String pkSupplierCode;
-    private List<POrderDetail> items;
+    private List<PurchaseOrderDetail> items;
+    @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date dMakeDate;
 
     public PushPoOrder(){
 
     }
 
-    public PushPoOrder(POrder pOrder){
-        this.pkOrder = pOrder.getPkOrder();
-        this.billCode = pOrder.getBillCode();
-        this.ownerId = pOrder.getOwnerId();
-        this.pkSupplierName = pOrder.getPkSupplierName();
-        this.pkSupplierCode = pOrder.getPkSupplierCode();
+    public PushPoOrder(PurchaseOrder purchaseOrder){
+        this.pkOrder = purchaseOrder.getPkOrder();
+        this.billCode = purchaseOrder.getBillCode();
+        this.ownerId = purchaseOrder.getOwnerId();
+        this.pkSupplierName = purchaseOrder.getPkSupplierName();
+        this.pkSupplierCode = purchaseOrder.getPkSupplierCode();
+        this.dMakeDate = purchaseOrder.getdMakeDate();
     }
 
     public String getPkOrder() {
@@ -71,11 +77,19 @@ public class PushPoOrder {
         this.pkSupplierCode = pkSupplierCode;
     }
 
-    public List<POrderDetail> getItems() {
+    public List<PurchaseOrderDetail> getItems() {
         return items;
     }
 
-    public void setItems(List<POrderDetail> items) {
+    public void setItems(List<PurchaseOrderDetail> items) {
         this.items = items;
+    }
+
+    public Date getdMakeDate() {
+        return dMakeDate;
+    }
+
+    public void setdMakeDate(Date dMakeDate) {
+        this.dMakeDate = dMakeDate;
     }
 }

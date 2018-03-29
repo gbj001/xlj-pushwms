@@ -2,7 +2,10 @@ package com.xinliangjishipin.pushwms.entity;
 
 import java.io.Serializable;
 
-public class POrderDetail implements Serializable{
+/**
+ * @author gengbeijun
+ */
+public class PurchaseOrderDetail implements Serializable{
 
     private String isGift;
     private String warehouseCode;
@@ -15,11 +18,11 @@ public class POrderDetail implements Serializable{
     private String billCode;
 
 
-    public POrderDetail(){
+    public PurchaseOrderDetail(){
 
     }
 
-    public POrderDetail(String isGift, String warehouseCode, String materialCode, String materialName, Double quantity, String measureUnits, String pkOrderHeader, String pkOrderBody, String billCode) {
+    public PurchaseOrderDetail(String isGift, String warehouseCode, String materialCode, String materialName, Double quantity, String measureUnits, String pkOrderHeader, String pkOrderBody, String billCode) {
         this.isGift = isGift;
         this.warehouseCode = warehouseCode;
         this.materialCode = materialCode;
@@ -33,7 +36,7 @@ public class POrderDetail implements Serializable{
 
     @Override
     public String toString() {
-        return "POrderDetail{" +
+        return "PurchaseOrderDetail{" +
                 "isGift='" + isGift + '\'' +
                 ", warehouseCode='" + warehouseCode + '\'' +
                 ", materialCode='" + materialCode + '\'' +

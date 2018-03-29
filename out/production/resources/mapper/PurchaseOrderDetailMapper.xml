@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.xinliangjishipin.pushwms.mapper.POrderDetailMapper">
-    <resultMap id="pOrdersDetailMap" type="com.xinliangjishipin.pushwms.entity.POrderDetail">
+<mapper namespace="com.xinliangjishipin.pushwms.mapper.PurchaseOrderDetailMapper">
+    <resultMap id="purchaseOrderDetailMap" type="com.xinliangjishipin.pushwms.entity.PurchaseOrderDetail">
         <result property="isGift" column="is_gift"/>
         <result property="warehouseCode" column="warehouse_code"/>
         <result property="materialCode" column="material_code"/>
@@ -11,7 +11,7 @@
         <result property="pkOrderHeader" column="pk_order_header"/>
         <result property="pkOrderBody" column="pk_order_body"/>
     </resultMap>
-    <select id="getPOrdersDetail" parameterType="string" resultMap="pOrdersDetailMap">
+    <select id="getPurchaseOrderDetail" parameterType="string" resultMap="purchaseOrderDetailMap">
         SELECT CASE WHEN blargess='N' THEN '0' ELSE '1' END "is_gift", bd_stordoc.code "warehouse_code",
         bd_material.code "material_code",
         bd_material.name "material_name", po_order_b.nastnum "quantity", bd_measdoc.name "measure_units",

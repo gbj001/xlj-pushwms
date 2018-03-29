@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.xinliangjishipin.pushwms.mapper.POrderMapper">
-    <resultMap id="pOrdersMap" type="com.xinliangjishipin.pushwms.entity.POrder">
+<mapper namespace="com.xinliangjishipin.pushwms.mapper.PurchaseOrderMapper">
+    <resultMap id="purchaseOrdersMap" type="com.xinliangjishipin.pushwms.entity.PurchaseOrder">
         <result property="pkOrder" column="pk_order"/>
         <result property="billCode" column="bill_code"/>
         <result property="ownerId" column="owner_id"/>
         <result property="pkSupplierName" column="pk_supplier_name"/>
         <result property="pkSupplierCode" column="pk_supplier_code"/>
     </resultMap>
-    <select id="getPOrders" resultMap="pOrdersMap">
-        SELECT pk_order "pk_order", vbillcode "bill_code", po_order.pk_org "owner_id",
+    <select id="getPurchaseOrders" resultMap="purchaseOrdersMap">
+        SELECT pk_order "pk_order", vbillcode "bill_code", po_order.pk_org "owner_id", dmakedate "dmakedate",
         po_order.pk_supplier "pk_supplier_code", bd_supplier.name "pk_supplier_name"
         FROM po_order JOIN bd_supplier ON bd_supplier.pk_supplier = po_order.pk_supplier
         WHERE po_order.forderstatus ='3'
         AND NVL(po_order.dr, 0) = 0
         AND NVL(bd_supplier.dr,0) = 0
         AND taudittime > '2018-02-25'
-        AND po_order.vbillcode in('CD2018022600000754','CD2018031900000756')
+--         AND po_order.vbillcode in('CD2018022600000754','CD2018031900000756')
+--         AND po_order.vbillcode in('CD2018022600000754')
     </select>
 </mapper>
